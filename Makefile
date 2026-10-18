@@ -28,3 +28,6 @@ check: lint typecheck test
 
 train:
 	$(RUN) python -m scripts.train_dense
+
+prune:
+	$(RUN) python -m scripts.train_prune --criterion fisher_taylor --sparsity 0.9 --seed 0

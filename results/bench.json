@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "machine": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.4",
+    "omp_threads": "1",
+    "note": "median of repeated runs after warmup; single BLAS thread"
+  },
+  "rows": [
+    {
+      "target_sparsity": 0.0,
+      "achieved_sparsity": 0.0,
+      "test_acc": 0.9768,
+      "active_params": 266610,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 532810,
+      "flops_compact_dense": 532810,
+      "compact_shapes": [
+        [
+          784,
+          300
+        ],
+        [
+          300,
+          100
+        ],
+        [
+          100,
+          10
+        ]
+      ],
+      "compact_inputs": 784,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 2.288818359375e-05,
+      "ms_b1_dense_x_zeros": 0.009708106517791748,
+      "ms_b1_csr": 0.27162511833012104,
+      "ms_b1_compact": 0.009707873687148094,
+      "ms_b256_dense_x_zeros": 0.12414599768817425,
+      "ms_b256_csr": 269.931583548896,
+      "ms_b256_compact": 0.1271250657737255
+    },
+    {
+      "target_sparsity": 0.5,
+      "achieved_sparsity": 0.5,
+      "test_acc": 0.9765,
+      "active_params": 133510,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 266610,
+      "flops_compact_dense": 531568,
+      "compact_shapes": [
+        [
+          784,
+          300
+        ],
+        [
+          300,
+          98
+        ],
+        [
+          98,
+          10
+        ]
+      ],
+      "compact_inputs": 784,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 1.9073486328125e-05,
+      "ms_b1_dense_x_zeros": 0.0100000761449337,
+      "ms_b1_csr": 0.14479097444564104,
+      "ms_b1_compact": 0.008833128958940506,
+      "ms_b256_dense_x_zeros": 0.12889562640339136,
+      "ms_b256_csr": 90.65379144158214,
+      "ms_b256_compact": 0.1264374004676938
+    },
+    {
+      "target_sparsity": 0.75,
+      "achieved_sparsity": 0.75,
+      "test_acc": 0.9785,
+      "active_params": 66960,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 133510,
+      "flops_compact_dense": 527503,
+      "compact_shapes": [
+        [
+          784,
+          297
+        ],
+        [
+          297,
+          100
+        ],
+        [
+          100,
+          10
+        ]
+      ],
+      "compact_inputs": 784,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 1.52587890625e-05,
+      "ms_b1_dense_x_zeros": 0.00954093411564827,
+      "ms_b1_csr": 0.07920898497104645,
+      "ms_b1_compact": 0.008542090654373169,
+      "ms_b256_dense_x_zeros": 0.12389547191560268,
+      "ms_b256_csr": 37.8193334909156,
+      "ms_b256_compact": 0.1309375511482358
+    },
+    {
+      "target_sparsity": 0.9,
+      "achieved_sparsity": 0.9,
+      "test_acc": 0.9812,
+      "active_params": 27030,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 53650,
+      "flops_compact_dense": 357685,
+      "compact_shapes": [
+        [
+          546,
+          275
+        ],
+        [
+          275,
+          100
+        ],
+        [
+          100,
+          10
+        ]
+      ],
+      "compact_inputs": 546,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 1.33514404296875e-05,
+      "ms_b1_dense_x_zeros": 0.009917188435792923,
+      "ms_b1_csr": 0.041082967072725296,
+      "ms_b1_compact": 0.008541857823729515,
+      "ms_b256_dense_x_zeros": 0.1266875769942999,
+      "ms_b256_csr": 11.714916443452239,
+      "ms_b256_compact": 0.12614543084055185
+    },
+    {
+      "target_sparsity": 0.95,
+      "achieved_sparsity": 0.95,
+      "test_acc": 0.9801,
+      "active_params": 13720,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 27030,
+      "flops_compact_dense": 222811,
+      "compact_shapes": [
+        [
+          442,
+          205
+        ],
+        [
+          205,
+          96
+        ],
+        [
+          96,
+          10
+        ]
+      ],
+      "compact_inputs": 442,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 1.1444091796875e-05,
+      "ms_b1_dense_x_zeros": 0.010041985660791397,
+      "ms_b1_csr": 0.027708010748028755,
+      "ms_b1_compact": 0.007166992872953415,
+      "ms_b256_dense_x_zeros": 0.12727093417197466,
+      "ms_b256_csr": 5.312604014761746,
+      "ms_b256_compact": 0.10116701014339924
+    },
+    {
+      "target_sparsity": 0.98,
+      "achieved_sparsity": 0.98,
+      "test_acc": 0.9779,
+      "active_params": 5734,
+      "dense_params": 266610,
+      "flops_dense": 532810,
+      "flops_csr": 11058,
+      "flops_compact_dense": 114187,
+      "compact_shapes": [
+        [
+          385,
+          117
+        ],
+        [
+          117,
+          94
+        ],
+        [
+          94,
+          10
+        ]
+      ],
+      "compact_inputs": 385,
+      "paths_agree_with_dense": true,
+      "max_abs_logit_diff": 9.5367431640625e-06,
+      "ms_b1_dense_x_zeros": 0.009874813258647919,
+      "ms_b1_csr": 0.020083971321582794,
+      "ms_b1_compact": 0.006749993190169334,
+      "ms_b256_dense_x_zeros": 0.12370850890874863,
+      "ms_b256_csr": 2.0065620774403214,
+      "ms_b256_compact": 0.07475004531443119
+    }
+  ]
+}

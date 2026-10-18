@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 
 from nn import mlp
+from nn.module import Module
 from optim import Adam
 from prune.criteria import make_criterion
 from prune.pruner import Pruner
@@ -39,6 +40,12 @@ class PruneConfig:
 
 
 def run_pruning(cfg: PruneConfig, data: Dataset, verbose: bool = False) -> dict[str, Any]:
+    return run_pruning_with_model(cfg, data, verbose)[0]
+
+
+def run_pruning_with_model(
+    cfg: PruneConfig, data: Dataset, verbose: bool = False
+) -> tuple[dict[str, Any], Module]:
     t_start = time.perf_counter()
     rng = np.random.default_rng(cfg.seed)  # same seed -> same init for every criterion
     model = mlp(cfg.sizes, rng)
@@ -77,7 +84,7 @@ def run_pruning(cfg: PruneConfig, data: Dataset, verbose: bool = False) -> dict[
     # A "pruned" weight must be a real zero, and the model must be finite.
     assert all(not p.data[~p.alive()].any() for p in weights)
     assert all(np.isfinite(p.data).all() for p in model.parameters())
-    return {
+    result = {
         "config": asdict(cfg),
         "test_acc": test_acc,
         "test_loss": test_loss,
@@ -92,3 +99,4 @@ def run_pruning(cfg: PruneConfig, data: Dataset, verbose: bool = False) -> dict[
         "events": pruner.log if pruner else [],
         "seconds": time.perf_counter() - t_start,
     }
+    return result, model

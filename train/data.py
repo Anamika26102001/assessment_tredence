@@ -19,6 +19,8 @@ class Dataset:
     y_val: np.ndarray
     x_test: np.ndarray
     y_test: np.ndarray
+    mean: float = 0.0  # normalisation constants of the train split (used by the demo)
+    std: float = 1.0
 
 
 def _download() -> tuple[np.ndarray, np.ndarray]:
@@ -52,8 +54,10 @@ def split_and_normalize(
     tr, va = perm[:n_train], perm[n_train : n_train + n_val]
     xf = x.astype(np.float32) / 255.0
     mean, std = xf[tr].mean(), xf[tr].std()
-    xf = (xf - mean) / std
-    return Dataset(xf[tr], y[tr], xf[va], y[va], xf[pool:][:n_test], y[pool:][:n_test])
+    xf = (xf - mean) / std  # mean/std stay the raw-pixel train statistics
+    return Dataset(
+        xf[tr], y[tr], xf[va], y[va], xf[pool:][:n_test], y[pool:][:n_test], float(mean), float(std)
+    )
 
 
 def load_mnist() -> Dataset:

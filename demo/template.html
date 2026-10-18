@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pruned Digit Demo</title>
+<style>
+:root{--bg:#fafaf8;--fg:#1c1c1a;--mut:#6b6b66;--card:#fff;--line:#e2e2dc;--acc:#2a6fdb;--ok:#1a7f4b;--bad:#c0392b;--bar:#d9e4f7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#161614;--fg:#ecece6;--mut:#9a9a92;--card:#1f1f1c;--line:#34342f;--acc:#6aa3ff;--ok:#4cc38a;--bad:#ff7b6b;--bar:#2a3a55}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:22px 16px 56px}
+h1{font-size:24px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 18px}
+.layout{display:grid;grid-template-columns:minmax(260px,320px) 1fr;gap:18px}
+@media (max-width:760px){.layout{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+canvas{display:block;border:1px solid var(--line);border-radius:6px;touch-action:none}
+#draw{width:100%;max-width:290px;aspect-ratio:1;background:#000;cursor:crosshair}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+button,select{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+.lbl{color:var(--mut);font-size:13px}
+.samples{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:8px}
+.samples canvas{width:100%;aspect-ratio:1;cursor:pointer;image-rendering:pixelated}
+.samples canvas:hover{outline:2px solid var(--acc)}
+.models{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px}
+.pred{font-size:34px;font-weight:700;line-height:1}
+.bars div.b{display:flex;align-items:center;gap:6px;font-size:12px;height:15px}
+.bars .t{width:10px;color:var(--mut)}.bars .f{height:9px;background:var(--bar);border-radius:2px}
+.bars .top .f{background:var(--acc)}.bars .p{color:var(--mut);width:34px}
+.meta{font-size:12.5px;color:var(--mut);margin-top:8px}.meta b{color:var(--fg)}
+.surv{width:84px;height:84px;image-rendering:pixelated;float:right;margin:0 0 4px 8px}
+#check{font-size:13px;margin-top:14px}.ok{color:var(--ok)}.bad{color:var(--bad)}
+#proc{width:84px;height:84px;image-rendering:pixelated}
+</style>
+</head>
+<body>
+<main>
+<h1>Pruned digit demo</h1>
+<p class="sub">A dense MLP and self-pruned MLPs (784-300-100-10) classify what you draw. Pruned models run on sparse (CSR) weights in plain JavaScript.</p>
+<div class="layout">
+  <div>
+    <div class="card">
+      <canvas id="draw" width="280" height="280"></canvas>
+      <div class="row"><button id="clear">Clear</button>
+        <span class="lbl">Draw one digit, big and centred.</span></div>
+      <div class="row"><span class="lbl">What the models see (28&times;28):</span><canvas id="proc" width="28" height="28"></canvas></div>
+      <div class="lbl" style="margin-top:12px">Or click a real test image:</div>
+      <div class="samples" id="samples"></div>
+    </div>
+    <div class="row"><label class="lbl" for="method">Pruning method</label>
+      <select id="method"></select></div>
+    <div id="check" class="lbl"></div>
+  </div>
+  <div class="models" id="models"></div>
+</div>
+</main>
+<script>
+const DATA = __DATA__;
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('en-US');
+
+// ---------- forward pass (dense and CSR layers) ----------
+function forward(model, x){
+  let h = x;
+  for (const L of model.layers){
+    const out = new Float32Array(L.n_out);
+    if (L.w){                                   // dense, row-major (in, out)
+      out.set(L.bias);
+      for (let i = 0; i < L.n_in; i++){
+        const hi = h[i]; if (hi === 0) continue;
+        const o = i * L.n_out;
+        for (let j = 0; j < L.n_out; j++) out[j] += hi * L.w[o + j];
+      }
+    } else {                                    // CSR of W^T: row j = inputs of output unit j
+      for (let j = 0; j < L.n_out; j++){
+        let s = L.bias[j];
+        for (let k = L.indptr[j]; k < L.indptr[j + 1]; k++) s += L.data[k] * h[L.indices[k]];
+        out[j] = s;
+      }
+    }
+    if (L.act === 'relu') for (let j = 0; j < out.length; j++) if (out[j] < 0) out[j] = 0;
+    h = out;
+  }
+  return h;
+}
+function softmax(z){
+  const m = Math.max(...z); const e = Array.from(z, v => Math.exp(v - m));
+  const s = e.reduce((a, b) => a + b, 0); return e.map(v => v / s);
+}
+const normalize = raw => Float32Array.from(raw, v => (v / 255 - DATA.norm.mean) / DATA.norm.std);
+
+// ---------- preprocessing of a drawing, MNIST-style ----------
+// crop to bounding box, scale to fit 20x20, then place centre of mass at (14,14)
+function preprocess(canvas){
+  const W = canvas.width, d = canvas.getContext('2d').getImageData(0, 0, W, W).data;
+  let x0 = W, y0 = W, x1 = -1, y1 = -1;
+  for (let y = 0; y < W; y++) for (let x = 0; x < W; x++)
+    if (d[(y * W + x) * 4] > 20){ x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  if (x1 < 0) return null;
+  const w = x1 - x0 + 1, h = y1 - y0 + 1, s = 20 / Math.max(w, h);
+  const t = document.createElement('canvas'); t.width = t.height = 28;
+  const c = t.getContext('2d'); c.fillStyle = '#000'; c.fillRect(0, 0, 28, 28);
+  c.imageSmoothingEnabled = true;
+  c.drawImage(canvas, x0, y0, w, h, (28 - w * s) / 2, (28 - h * s) / 2, w * s, h * s);
+  const g = c.getImageData(0, 0, 28, 28).data;
+  let m = 0, cx = 0, cy = 0;
+  for (let y = 0; y < 28; y++) for (let x = 0; x < 28; x++){ const v = g[(y * 28 + x) * 4]; m += v; cx += v * x; cy += v * y; }
+  const dx = Math.round(14 - cx / m), dy = Math.round(14 - cy / m);
+  const out = new Array(784).fill(0);
+  for (let y = 0; y < 28; y++) for (let x = 0; x < 28; x++){
+    const nx = x + dx, ny = y + dy;
+    if (nx >= 0 && nx < 28 && ny >= 0 && ny < 28) out[ny * 28 + nx] = g[(y * 28 + x) * 4];
+  }
+  return out;
+}
+function paint28(canvas, raw, scaleFn){
+  const c = canvas.getContext('2d'), im = c.createImageData(28, 28);
+  for (let i = 0; i < 784; i++){ const [r, g, b] = scaleFn(raw[i]); im.data.set([r, g, b, 255], i * 4); }
+  c.putImageData(im, 0, 0);
+}
+const gray = v => [v, v, v];
+const heat = v => [Math.round(235 - 200 * v), Math.round(240 - 150 * v), Math.round(250 - 40 * v)];  // pale -> blue
+
+// ---------- UI ----------
+const methods = [...new Set(DATA.models.map(m => m.method).filter(m => m !== 'dense'))];
+const sel = $('method');
+methods.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o); });
+sel.value = methods.includes('magnitude') ? 'magnitude' : methods[0];
+let current = null;   // 784 raw pixel values currently shown
+
+function visibleModels(){ return DATA.models.filter(m => m.method === 'dense' || m.method === sel.value); }
+
+function render(){
+  const root = $('models'); root.innerHTML = '';
+  for (const m of visibleModels()){
+    const card = document.createElement('div'); card.className = 'card';
+    const title = m.method === 'dense' ? 'Dense' : `${(m.sparsity * 100).toFixed(0)}% pruned`;
+    let pred = '–', bars = '', top = -1;
+    if (current){
+      const p = softmax(forward(m, normalize(current)));
+      top = p.indexOf(Math.max(...p)); pred = top;
+      bars = p.map((v, i) => `<div class="b ${i === top ? 'top' : ''}"><span class="t">${i}</span><span class="f" style="width:${Math.max(1, v * 120)}px"></span><span class="p">${(v * 100).toFixed(0)}%</span></div>`).join('');
+    }
+    card.innerHTML = `<canvas class="surv" width="28" height="28" title="fraction of first-layer connections kept per pixel"></canvas>
+      <div class="lbl">${title}${m.method !== 'dense' ? ' &middot; ' + m.method : ''}</div>
+      <div class="pred">${pred}</div>
+      <div class="bars" style="margin-top:8px;clear:both">${bars || '<span class="lbl">draw or pick a digit</span>'}</div>
+      <div class="meta">test accuracy <b>${(m.test_acc * 100).toFixed(2)}%</b><br>
+      weights kept <b>${fmt(m.active_params)}</b> of ${fmt(m.total_params)}<br>
+      FLOPs/sample <b>${fmt(m.flops)}</b> (${(m.flops_dense / m.flops).toFixed(1)}&times; fewer)</div>`;
+    root.appendChild(card);
+    paint28(card.querySelector('.surv'), m.pixel_survival, heat);
+  }
+}
+function setInput(raw){
+  current = raw;
+  if (raw) paint28($('proc'), raw, gray); else $('proc').getContext('2d').clearRect(0, 0, 28, 28);
+  render();
+}
+
+// drawing
+const cv = $('draw'), ctx = cv.getContext('2d');
+function resetCanvas(){ ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 280, 280); }
+resetCanvas();
+let drawing = false, last = null;
+const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * 280 / r.width, (e.clientY - r.top) * 280 / r.height]; };
+cv.addEventListener('pointerdown', e => { drawing = true; last = pos(e); cv.setPointerCapture(e.pointerId); stroke(last, last); });
+cv.addEventListener('pointermove', e => { if (!drawing) return; const p = pos(e); stroke(last, p); last = p; });
+const end = () => { if (!drawing) return; drawing = false; setInput(preprocess(cv)); };
+cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+function stroke(a, b){
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+}
+$('clear').onclick = () => { resetCanvas(); setInput(null); };
+sel.onchange = render;
+
+// sample test images
+DATA.samples.forEach((s, i) => {
+  const c = document.createElement('canvas'); c.width = c.height = 28; c.title = `test image, true label ${s.label}`;
+  paint28(c, s.pixels, gray);
+  c.onclick = () => { resetCanvas(); setInput(s.pixels); };
+  $('samples').appendChild(c);
+});
+
+// self-check: JS forward == Python forward on the exported sample images
+(function selfCheck(){
+  let ok = 0, n = 0, maxd = 0;
+  for (const m of DATA.models) DATA.samples.forEach((s, i) => {
+    const z = forward(m, normalize(s.pixels));
+    n++; if (z.indexOf(Math.max(...z)) === m.expected[i]) ok++;
+    z.forEach((v, j) => { maxd = Math.max(maxd, Math.abs(v - m.expected_logits[i][j])); });
+  });
+  const el = $('check');
+  el.className = (ok === n && maxd < 1e-2) ? 'ok' : 'bad';
+  el.textContent = `Self-check: JavaScript forward pass agrees with Python on ${ok}/${n} predictions (max logit difference ${maxd.toExponential(1)}).`;
+})();
+render();
+</script>
+</body>
+</html>

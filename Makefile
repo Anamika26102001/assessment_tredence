@@ -6,7 +6,7 @@ export VECLIB_MAXIMUM_THREADS := 1
 
 RUN := uv run
 
-.PHONY: install lint typecheck test gradcheck train prune sweep sweep-quick bench stats plots check
+.PHONY: install lint typecheck test gradcheck train prune sweep sweep-quick bench demo check
 
 install:
 	uv sync
@@ -42,3 +42,7 @@ sweep:
 
 sweep-quick:
 	$(RUN) python -m scripts.sweep --quick --out results/quick_runs
+
+demo:
+	$(RUN) python -m scripts.export_demo
+	@echo "open demo/index.html in a browser"

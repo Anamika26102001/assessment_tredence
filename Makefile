@@ -34,3 +34,11 @@ prune:
 
 bench:
 	$(RUN) python -m scripts.bench_inference
+
+sweep:
+	$(RUN) python -m scripts.sweep --jobs 4
+	$(RUN) python -m scripts.stats
+	$(RUN) python -m scripts.make_plots
+
+sweep-quick:
+	$(RUN) python -m scripts.sweep --quick --out results/quick_runs

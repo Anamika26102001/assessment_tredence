@@ -31,3 +31,6 @@ train:
 
 prune:
 	$(RUN) python -m scripts.train_prune --criterion fisher_taylor --sparsity 0.9 --seed 0
+
+bench:
+	$(RUN) python -m scripts.bench_inference

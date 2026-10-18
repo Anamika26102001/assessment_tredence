@@ -25,3 +25,6 @@ gradcheck:
 	$(RUN) pytest tests/test_gradcheck.py tests/test_broadcast.py tests/test_masked.py
 
 check: lint typecheck test
+
+train:
+	$(RUN) python -m scripts.train_dense

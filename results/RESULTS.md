@@ -6,7 +6,7 @@ At 95% sparsity (achieved 95.00%), fisher_taylor pruning reaches 97.97% +/- 0.15
 
 ### Ablations at the same sparsity
 
-- At 95%: fisher_taylor+regrow - fisher_taylor = +0.04 pp [-0.03, +0.10], fisher_taylor+regrow better in 5/8 seeds, p = 0.3047.
+- At 95%: fisher_taylor+regrow - fisher_taylor = +0.05 pp [-0.03, +0.11], fisher_taylor+regrow better in 6/8 seeds, p = 0.2422.
 - At 95%: fisher_taylor - taylor1 = +0.29 pp [+0.19, +0.37], fisher_taylor better in 8/8 seeds, p = 0.0078.
 - At 95%: fisher_taylor - fisher_taylor+oneshot = +0.56 pp [+0.46, +0.65], fisher_taylor better in 8/8 seeds, p = 0.0078.
 
@@ -23,9 +23,9 @@ At 95% sparsity (achieved 95.00%), fisher_taylor pruning reaches 97.97% +/- 0.15
 | fisher_taylor+oneshot | 90% | 90.00% | 8 | 97.92 +/- 0.10 | 97.77 | 98.02 | 26,620 |
 | fisher_taylor+oneshot | 95% | 95.00% | 8 | 97.41 +/- 0.15 | 97.23 | 97.68 | 13,310 |
 | fisher_taylor+oneshot | 98% | 98.00% | 8 | 96.00 +/- 0.17 | 95.84 | 96.38 | 5,324 |
-| fisher_taylor+regrow | 90% | 90.00% | 8 | 98.09 +/- 0.09 | 97.90 | 98.19 | 26,620 |
-| fisher_taylor+regrow | 95% | 95.00% | 8 | 98.01 +/- 0.07 | 97.87 | 98.10 | 13,310 |
-| fisher_taylor+regrow | 98% | 98.00% | 8 | 97.63 +/- 0.11 | 97.43 | 97.80 | 5,324 |
+| fisher_taylor+regrow | 90% | 90.00% | 8 | 98.08 +/- 0.10 | 97.94 | 98.27 | 26,620 |
+| fisher_taylor+regrow | 95% | 95.00% | 8 | 98.02 +/- 0.12 | 97.78 | 98.20 | 13,310 |
+| fisher_taylor+regrow | 98% | 98.00% | 8 | 97.66 +/- 0.16 | 97.47 | 97.92 | 5,324 |
 | magnitude | 50% | 50.00% | 8 | 97.91 +/- 0.16 | 97.62 | 98.07 | 133,100 |
 | magnitude | 75% | 75.00% | 8 | 98.12 +/- 0.11 | 97.99 | 98.34 | 66,550 |
 | magnitude | 90% | 90.00% | 8 | 98.24 +/- 0.12 | 98.00 | 98.38 | 26,620 |
@@ -44,9 +44,9 @@ At 95% sparsity (achieved 95.00%), fisher_taylor pruning reaches 97.97% +/- 0.15
 | fisher_taylor | magnitude | 90% | -0.17 | [-0.28, -0.05] | 0.0469 | 1/8 | yes |
 | fisher_taylor | magnitude | 95% | -0.18 | [-0.29, -0.07] | 0.0312 | 2/8 | yes |
 | fisher_taylor | magnitude | 98% | -0.18 | [-0.26, -0.10] | 0.0156 | 0/8 | yes |
-| fisher_taylor+regrow | fisher_taylor | 90% | +0.02 | [-0.08, +0.11] | 0.6875 | 5/8 | no |
-| fisher_taylor+regrow | fisher_taylor | 95% | +0.04 | [-0.03, +0.10] | 0.3047 | 5/8 | no |
-| fisher_taylor+regrow | fisher_taylor | 98% | -0.02 | [-0.10, +0.06] | 0.6250 | 3/8 | no |
+| fisher_taylor+regrow | fisher_taylor | 90% | +0.02 | [-0.06, +0.09] | 0.7188 | 4/8 | no |
+| fisher_taylor+regrow | fisher_taylor | 95% | +0.05 | [-0.03, +0.11] | 0.2422 | 6/8 | no |
+| fisher_taylor+regrow | fisher_taylor | 98% | +0.01 | [-0.10, +0.11] | 0.9062 | 4/8 | no |
 | fisher_taylor | taylor1 | 90% | +0.16 | [+0.03, +0.29] | 0.0625 | 7/8 | yes |
 | fisher_taylor | taylor1 | 95% | +0.29 | [+0.19, +0.37] | 0.0078 | 8/8 | yes |
 | fisher_taylor | taylor1 | 98% | +0.69 | [+0.62, +0.76] | 0.0078 | 8/8 | yes |

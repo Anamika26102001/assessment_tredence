@@ -62,9 +62,9 @@ def test_exact_budget_even_with_all_tied_scores() -> None:
     for p in model.prunable_parameters():
         p.data[...] = 0.5  # every score identical: ties must still give an exact count
     pr = make_pruner(model, opt)
-    pr.event(10)  # target 0
+    pr.event(10)
     assert pr.n_alive() == pr.total
-    pr.event(110)  # target 0.8
+    pr.event(110)
     assert pr.n_alive() == pr.total - round(pr.total * 0.8)
     assert pr.sparsity() == pytest.approx(0.8, abs=1e-3)
 
@@ -94,7 +94,7 @@ def test_prune_zeroes_weights_resets_state_and_never_revives() -> None:
     fit(model, opt, d, pr)
     assert pr.log and pr.sparsity() == pytest.approx(0.8, abs=1e-3)  # events really fired
     for p in pr.params:
-        assert not p.data[~p.alive()].any()  # real zeros
+        assert not p.data[~p.alive()].any()
         assert not opt.m[id(p)][~p.alive()].any() and not opt.v[id(p)][~p.alive()].any()
         assert not opt.t[id(p)][~p.alive()].any()
     # masks only shrink without regrowth
@@ -135,7 +135,7 @@ def test_regrowth_swaps_without_changing_sparsity_and_starts_fresh() -> None:
     for p, b in zip(pr.params, before, strict=True):
         grown = p.alive() & ~b
         grown_total += int(grown.sum())
-        assert not p.data[grown].any()  # start at exactly 0
+        assert not p.data[grown].any()
         assert not opt.m[id(p)][grown].any() and not opt.v[id(p)][grown].any()
         assert not opt.t[id(p)][grown].any()
     assert grown_total > 0
@@ -161,7 +161,7 @@ def test_regrow_picks_dead_weights_with_largest_dense_gradient_and_spares_droppe
     )
     dead_before = np.concatenate([(~b).ravel() for b in before])
     assert grown.sum() == dropped.sum() > 0
-    assert not (grown & dropped).any()  # dropped weights are not regrown in the same event
+    assert not (grown & dropped).any()
     assert g2[grown].min() >= np.sort(g2[dead_before])[-int(grown.sum())] - 1e-12
 
 
@@ -185,7 +185,7 @@ def test_regrow_never_revives_weights_pruned_in_the_same_event() -> None:
     pr.event(50)
     alive = np.concatenate([p.alive().ravel() for p in pr.params])
     assert pr.log[-1]["regrown"] > 0
-    assert alive[dead].any()  # regrowth did happen, from previously dead weights
+    assert alive[dead].any()
     assert not alive[weakest].any()
 
 

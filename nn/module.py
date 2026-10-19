@@ -56,7 +56,7 @@ class Parameter(Tensor):
             raise ValueError(f"mask shape {new_mask.shape} != param shape {self.shape}")
         changed = self.alive() != new_mask
         self.data[~new_mask] = 0.0  # a real zero, not a small number
-        self.data[new_mask & changed] = 0.0  # revived: starts from zero
+        self.data[new_mask & changed] = 0.0
         self.mask = new_mask.copy()
         self._mask_f = Tensor(self.mask.astype(self.data.dtype))
         if optimizer is not None:

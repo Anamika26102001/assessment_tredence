@@ -11,11 +11,16 @@ Removing weight w_i means moving it by delta_i = -w_i. Second-order expansion:
 * ``taylor1`` = |g_i w_i| is the first-order term. Near a minimum E[g] ~ 0, so on a single
   mini-batch it is dominated by gradient *noise* and says little about the true effect.
 * ``fisher_taylor`` keeps the second-order term. With the empirical Fisher as a
-  Hessian-diagonal proxy, H_ii ~ F_ii = E[g_i^2] (exact when the model is well-specified
-  at a minimum), so  dL_i ~= 1/2 F_ii w_i^2.  This is Optimal Brain Damage with the Fisher
-  diagonal. We rank by s_i = w_i^2 * EMA[g_i^2] (the constant 1/2 does not change ranks).
-  Averaging g^2 over many batches (EMA) is exactly what makes it a stable estimate of
-  F_ii, and it costs nothing extra: it reuses gradients the optimizer already computes.
+  Hessian-diagonal proxy, H_ii ~ F_ii = E_x[g_i(x)^2] (equal to the Hessian in expectation
+  when the model is well-specified at a minimum), so  dL_i ~= 1/2 F_ii w_i^2.  This is
+  Optimal Brain Damage with the Fisher diagonal. We rank by s_i = w_i^2 * EMA[g_i^2] (the
+  constant 1/2 does not change ranks). It reuses gradients the optimizer already computes.
+* What the EMA actually estimates: ``g`` is the batch-mean gradient, so EMA[g^2] is the
+  diagonal of the *empirical* Fisher up to a 1/B factor (B = batch size), plus an (E g)^2
+  term that is small near convergence. 1/B is common to all entries because every entry
+  sees the same batches (the last batch of an epoch is smaller: 88 vs 128 on MNIST), so
+  ranks are unaffected; regrown entries have a shorter history, which makes it only
+  approximately common for them.
 
 Scores are in units of loss, so they are comparable *across layers*, which is what lets
 us rank globally instead of fixing a per-layer sparsity by hand.

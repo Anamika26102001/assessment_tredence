@@ -46,7 +46,7 @@ def plan(
     base = PruneConfig(epochs=epochs, ramp_end_epoch=min(8, epochs - 2))
     cfgs: list[PruneConfig] = []
     for seed in seeds:
-        cfgs.append(replace(base, sparsity=0.0, seed=seed))  # dense reference (0% sparsity)
+        cfgs.append(replace(base, sparsity=0.0, seed=seed))
         for s in sparsities:
             for crit in ("magnitude", "fisher_taylor"):
                 cfgs.append(replace(base, criterion=crit, sparsity=s, seed=seed))

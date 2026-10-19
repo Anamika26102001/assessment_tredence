@@ -64,13 +64,18 @@ class Taylor1(Criterion):
 
 
 class FisherTaylor(Criterion):
-    """w^2 * EMA[g^2]: second-order Taylor term with the empirical Fisher diagonal."""
+    """w^2 * EMA[g^2]: second-order Taylor term with the empirical Fisher diagonal.
+
+    The EMA is bias-corrected per entry (as in Adam, with a step count ``n`` per weight), so
+    a regrown weight whose history was reset is scored on the same scale as one that has
+    been alive since the start."""
 
     name = "fisher_taylor"
 
     def __init__(self, beta: float = 0.99) -> None:
         self.beta = beta
         self.g2: dict[int, np.ndarray] = {}
+        self.n: dict[int, np.ndarray] = {}
 
     def update(self, params: Sequence[Parameter]) -> None:
         b = self.beta
@@ -78,18 +83,26 @@ class FisherTaylor(Criterion):
             if p.grad is None:
                 continue
             ema = self.g2.setdefault(id(p), np.zeros_like(p.data))
+            n = self.n.setdefault(id(p), np.zeros(p.shape, dtype=np.int64))
             ema *= b
             ema += (1 - b) * p.grad * p.grad
+            n += p.alive()
 
     def scores(self, params: Sequence[Parameter]) -> list[np.ndarray]:
-        return [
-            (p.data.astype(np.float64) ** 2) * self.g2.get(id(p), np.zeros_like(p.data))
-            for p in params
-        ]
+        out = []
+        for p in params:
+            if id(p) not in self.g2:
+                out.append(np.zeros(p.shape))
+                continue
+            n = self.n[id(p)]
+            correction = np.where(n > 0, 1.0 - self.beta ** n.astype(np.float64), 1.0)
+            out.append((p.data.astype(np.float64) ** 2) * self.g2[id(p)] / correction)
+        return out
 
     def reset_entries(self, param: Parameter, entries: np.ndarray) -> None:
         if id(param) in self.g2:
             self.g2[id(param)][entries] = 0.0
+            self.n[id(param)][entries] = 0
 
 
 def make_criterion(name: str, beta: float = 0.99) -> Criterion:

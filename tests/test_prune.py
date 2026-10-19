@@ -5,6 +5,7 @@ import pytest
 
 from engine import Tensor, no_grad, softmax_cross_entropy
 from nn import mlp
+from nn.module import Parameter
 from optim import Adam
 from prune import (
     CubicSchedule,
@@ -241,6 +242,19 @@ def test_fisher_taylor_tracks_true_loss_increase_better_than_magnitude() -> None
     print(f"spearman with true loss increase: fisher_taylor {rho_f:.3f}, magnitude {rho_m:.3f}")
     assert rho_f > rho_m
     assert rho_f > 0.3
+
+
+def test_fisher_ema_is_bias_corrected_per_entry() -> None:
+    crit = FisherTaylor(beta=0.99)
+    w = Parameter(np.ones(2))
+    for step in range(300):
+        w.grad = np.full(2, 0.5)  # identical gradient history for both entries
+        crit.update([w])
+        if step == 249:  # entry 1 is revived: its statistics start from nothing
+            crit.reset_entries(w, np.array([False, True]))
+    established, revived = crit.scores([w])[0]
+    assert established == pytest.approx(0.25)  # w^2 * g^2 for a constant gradient
+    assert revived == pytest.approx(established, rel=1e-6)
 
 
 def test_taylor1_and_magnitude_scores_shapes() -> None:

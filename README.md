@@ -17,8 +17,8 @@ Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 ```
 
-Dataset: MNIST (OpenML `mnist_784`, version 1). **The first run downloads it (about 15 MB) and
-caches it at `data/mnist.npz`** (git-ignored); later runs read the cache. The split is fixed:
+Dataset: MNIST (OpenML `mnist_784`, version 1). **The first run downloads it from OpenML and
+caches it at `data/mnist.npz`** (14 MB, git-ignored); later runs read the cache. The split is fixed:
 55,000 train / 5,000 validation / 10,000 test (the standard test set), normalised with training
 statistics. All choices are made on validation; test accuracy is only reported.
 

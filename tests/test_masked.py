@@ -48,7 +48,7 @@ def test_masked_weights_get_exactly_zero_gradient() -> None:
     loss_of(lin, x, y).backward()
     g = lin.weight.grad
     assert g is not None
-    assert np.array_equal(g[~mask], np.zeros((~mask).sum()))  # bit-exact zero
+    assert np.array_equal(g[~mask], np.zeros((~mask).sum()))
 
 
 def test_gradient_matches_finite_differences_including_masked_entries() -> None:
@@ -140,9 +140,9 @@ def run_prune_revive(opt_factory, reset_on_change: bool):
 def test_revived_connection_takes_a_fresh_adam_first_step() -> None:
     lr = 0.01
     w_pruned, delta, g, opt, w, e = run_prune_revive(lambda ps: Adam(ps, lr=lr), True)
-    assert w_pruned == 0.0  # stayed a real zero while pruned
+    assert w_pruned == 0.0
     assert g != 0.0
-    assert delta == pytest.approx(-lr * np.sign(g), rel=1e-6)  # exactly -lr*sign(g)
+    assert delta == pytest.approx(-lr * np.sign(g), rel=1e-6)
     assert opt.t[id(w)][e] == 1
     assert opt.m[id(w)][e] == pytest.approx((1 - 0.9) * g)
 

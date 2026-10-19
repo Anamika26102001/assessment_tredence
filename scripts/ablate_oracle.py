@@ -21,6 +21,7 @@ import argparse
 import json
 import time
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -62,7 +63,7 @@ class Oracle:
                 h = np.maximum(h, 0)
         return float(-log_softmax_np(h)[np.arange(len(self.y)), self.y].mean())
 
-    def delta(self, layer: int, index: tuple[int, int]) -> float:
+    def delta(self, layer: int, index: tuple[Any, ...]) -> float:
         w = self.ws[layer]
         old = w[index]
         w[index] = 0.0

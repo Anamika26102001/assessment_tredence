@@ -1,0 +1,236 @@
+{
+  "sparsity": 0.95,
+  "per_seed": [
+    {
+      "seed": 0,
+      "jaccard": {
+        "layer1": 0.2245229081356718,
+        "layer2": 0.35568471789055855,
+        "layer3": 0.581151832460733,
+        "all": 0.2822118395067675
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8089,
+          4741,
+          480
+        ],
+        "fisher_taylor": [
+          7760,
+          4822,
+          728
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9822,
+        "fisher_taylor": 0.9801
+      }
+    },
+    {
+      "seed": 1,
+      "jaccard": {
+        "layer1": 0.22627235213204952,
+        "layer2": 0.3450653641718144,
+        "layer3": 0.5653298835705045,
+        "all": 0.27857829010566765
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8178,
+          4659,
+          473
+        ],
+        "fisher_taylor": [
+          7869,
+          4704,
+          737
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9805,
+        "fisher_taylor": 0.9785
+      }
+    },
+    {
+      "seed": 2,
+      "jaccard": {
+        "layer1": 0.24095439918373754,
+        "layer2": 0.3690120824449183,
+        "layer3": 0.5833333333333334,
+        "all": 0.297270955165692
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8046,
+          4816,
+          448
+        ],
+        "fisher_taylor": [
+          7765,
+          4815,
+          730
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9801,
+        "fisher_taylor": 0.9803
+      }
+    },
+    {
+      "seed": 3,
+      "jaccard": {
+        "layer1": 0.23230589153335934,
+        "layer2": 0.36174134997163926,
+        "layer3": 0.5786082474226805,
+        "all": 0.28954124884948895
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          7987,
+          4843,
+          480
+        ],
+        "fisher_taylor": [
+          7805,
+          4760,
+          745
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9822,
+        "fisher_taylor": 0.979
+      }
+    },
+    {
+      "seed": 4,
+      "jaccard": {
+        "layer1": 0.22502105504938366,
+        "layer2": 0.35122370115929585,
+        "layer3": 0.5554089709762533,
+        "all": 0.2794386234739979
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8055,
+          4806,
+          449
+        ],
+        "fisher_taylor": [
+          7945,
+          4635,
+          730
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9828,
+        "fisher_taylor": 0.9788
+      }
+    },
+    {
+      "seed": 5,
+      "jaccard": {
+        "layer1": 0.22886388498202845,
+        "layer2": 0.3544286113439508,
+        "layer3": 0.5578673602080624,
+        "all": 0.28443908323281064
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8100,
+          4762,
+          448
+        ],
+        "fisher_taylor": [
+          7627,
+          4933,
+          750
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9827,
+        "fisher_taylor": 0.9816
+      }
+    },
+    {
+      "seed": 6,
+      "jaccard": {
+        "layer1": 0.23606048856145792,
+        "layer2": 0.3345444382336501,
+        "layer3": 0.56,
+        "all": 0.28128609934539855
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8118,
+          4756,
+          436
+        ],
+        "fisher_taylor": [
+          7821,
+          4794,
+          695
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.9807,
+        "fisher_taylor": 0.9776
+      }
+    },
+    {
+      "seed": 7,
+      "jaccard": {
+        "layer1": 0.23925001936933446,
+        "layer2": 0.3416666666666667,
+        "layer3": 0.5660639777468707,
+        "all": 0.28561769535400366
+      },
+      "kept_per_layer": {
+        "magnitude": [
+          8120,
+          4745,
+          445
+        ],
+        "fisher_taylor": [
+          7875,
+          4754,
+          681
+        ]
+      },
+      "test_acc": {
+        "magnitude": 0.981,
+        "fisher_taylor": 0.9816
+      }
+    }
+  ],
+  "summary": {
+    "layer1": {
+      "mean": 0.2316563748683778,
+      "std": 0.006498728442804547
+    },
+    "layer2": {
+      "mean": 0.3516708664853117,
+      "std": 0.011103923018001739
+    },
+    "layer3": {
+      "mean": 0.5684704507148047,
+      "std": 0.011051362136524742
+    },
+    "all": {
+      "mean": 0.28479797937922835,
+      "std": 0.006156333813363617
+    }
+  },
+  "env": {
+    "cpu": "Apple M5",
+    "cpu_count": 10,
+    "machine": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.7",
+    "numpy": "2.5.4",
+    "blas": "accelerate",
+    "blas_threads_env": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    }
+  }
+}

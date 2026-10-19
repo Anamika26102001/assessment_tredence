@@ -61,7 +61,7 @@ def main() -> None:
     print(f"TEST loss {test_loss:.4f} acc {test_acc:.4f}  all-weights-finite={finite}")
 
     result = {
-        "config": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
+        "config": {k: v for k, v in vars(args).items() if k != "out"},
         "n_weights": int(sum(p.data.size for p in model.prunable_parameters())),
         "test_loss": test_loss,
         "test_acc": test_acc,

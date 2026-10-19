@@ -70,3 +70,12 @@ def test_unknown_optimizer_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="unknown optimizer"):
         run_pruning(PruneConfig(optimizer="rmsprop"), None)  # type: ignore[arg-type]
+
+
+def test_bench_time_paths_and_percentiles() -> None:
+    from scripts.bench_variance import q, time_paths
+
+    x = np.ones((2, 3))
+    s = time_paths({"a": lambda v: v + 1, "b": lambda v: v @ v.T}, x, inner=3, reps=7)
+    assert set(s) == {"a", "b"} and all(len(v) == 7 and min(v) > 0 for v in s.values())
+    assert q([1.0, 2.0, 3.0, 4.0, 5.0], 50) == 3.0 and q([1.0, 2.0, 3.0, 4.0, 5.0], 25) == 2.0

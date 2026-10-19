@@ -8,3 +8,8 @@ data/
 .DS_Store
 demo/index.html
 STUDY_NOTES.md
+.env
+.env.*
+results/quick_runs/
+*.egg-info/
+.coverage

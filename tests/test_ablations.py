@@ -63,3 +63,10 @@ def test_locate_and_band() -> None:
     score = np.arange(100.0)[::-1]  # rank 0 = index 0
     band = band_around_threshold(score, n_keep=50, n=10)
     assert sorted(band.tolist()) == list(range(45, 55))
+
+
+def test_unknown_optimizer_is_rejected() -> None:
+    from prune.experiment import PruneConfig, run_pruning
+
+    with pytest.raises(ValueError, match="unknown optimizer"):
+        run_pruning(PruneConfig(optimizer="rmsprop"), None)  # type: ignore[arg-type]

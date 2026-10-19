@@ -1,0 +1,57 @@
+{
+  "seed": 0,
+  "dense_test_acc": 0.9768,
+  "spearman": {
+    "magnitude_vs_fisher": {
+      "layer1": 0.7909531109011481,
+      "layer2": 0.6618848602902301,
+      "layer3": 0.6598145038145038,
+      "all": 0.7695176914815971
+    },
+    "magnitude_vs_taylor1": {
+      "layer1": 0.3196851373997437,
+      "layer2": 0.18030382367031608,
+      "layer3": 0.21262260495357055,
+      "all": 0.2853473395311482
+    },
+    "fisher_vs_taylor1": {
+      "layer1": 0.49566998533803197,
+      "layer2": 0.5785623081315788,
+      "layer3": 0.6101702088826797,
+      "all": 0.46406961823802884
+    }
+  },
+  "top5pct_jaccard": {
+    "magnitude_vs_fisher": {
+      "layer1": 0.292449719749423,
+      "layer2": 0.19142176330420968,
+      "layer3": 0.16279069767441862,
+      "all": 0.28710956387196596
+    },
+    "magnitude_vs_taylor1": {
+      "layer1": 0.11363636363636363,
+      "layer2": 0.05226236408277797,
+      "layer3": 0.02040816326530612,
+      "all": 0.10493109745973767
+    },
+    "fisher_vs_taylor1": {
+      "layer1": 0.15181194906953965,
+      "layer2": 0.13079532604598568,
+      "layer3": 0.08695652173913043,
+      "all": 0.14185218547591472
+    }
+  },
+  "env": {
+    "cpu": "Apple M5",
+    "cpu_count": 10,
+    "machine": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.7",
+    "numpy": "2.5.4",
+    "blas": "accelerate",
+    "blas_threads_env": {
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "VECLIB_MAXIMUM_THREADS": null
+    }
+  }
+}

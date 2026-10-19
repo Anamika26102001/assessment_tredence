@@ -29,7 +29,7 @@ COMPARISONS = [  # (A, B): positive difference means A is better
     ("fisher_taylor", "taylor1"),
     ("fisher_taylor", "fisher_taylor+oneshot"),
 ]
-CLAIM_SPARSITY = 0.95  # fixed before looking at results
+CLAIM_SPARSITY = 0.95  # headline level; chosen in the plan, not committed before the sweep results
 
 
 def load_runs(runs_dir: Path) -> list[dict]:

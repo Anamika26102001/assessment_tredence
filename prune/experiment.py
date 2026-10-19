@@ -12,7 +12,7 @@ import numpy as np
 
 from nn import mlp
 from nn.module import Module
-from optim import Adam
+from optim import SGD, Adam, Optimizer
 from prune.criteria import make_criterion
 from prune.pruner import Pruner
 from prune.schedule import CubicSchedule, OneShotSchedule
@@ -36,6 +36,8 @@ class PruneConfig:
     ema_beta: float = 0.99
     batch_size: int = 128
     lr: float = 1e-3
+    optimizer: str = "adam"  # adam | sgd (heavy-ball momentum)
+    momentum: float = 0.9  # sgd only
     sizes: list[int] = field(default_factory=lambda: [784, 300, 100, 10])
 
 
@@ -49,7 +51,13 @@ def run_pruning_with_model(
     t_start = time.perf_counter()
     rng = np.random.default_rng(cfg.seed)  # same seed -> same init for every criterion
     model = mlp(cfg.sizes, rng)
-    opt = Adam(model.parameters(), lr=cfg.lr)
+    opt: Optimizer
+    if cfg.optimizer == "adam":
+        opt = Adam(model.parameters(), lr=cfg.lr)
+    elif cfg.optimizer == "sgd":
+        opt = SGD(model.parameters(), lr=cfg.lr, momentum=cfg.momentum)
+    else:
+        raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
     spe = math.ceil(len(data.x_train) / cfg.batch_size)
 
     pruner: Pruner | None = None

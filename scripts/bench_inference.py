@@ -16,8 +16,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
-import platform
 import time
 from pathlib import Path
 
@@ -30,6 +28,7 @@ import numpy as np
 from engine import Tensor, no_grad
 from prune.experiment import PruneConfig, run_pruning_with_model
 from prune.sparse import SparseMLP, compact, dense_flops_per_sample
+from scripts.ablate_lib import env_info
 from train.data import load_mnist
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -114,10 +113,8 @@ def main() -> None:
 
     args.out.mkdir(parents=True, exist_ok=True)
     meta = {
-        "machine": platform.platform(),
-        "numpy": np.__version__,
-        "omp_threads": os.environ.get("OMP_NUM_THREADS"),
-        "note": "median of repeated runs after warmup; single BLAS thread",
+        **env_info(),
+        "note": "median of repeated runs after warmup; single BLAS thread; one seed, fisher_taylor",
     }
     (args.out / "bench.json").write_text(json.dumps({"meta": meta, "rows": rows}, indent=2))
     with open(args.out / "bench.csv", "w", newline="") as f:

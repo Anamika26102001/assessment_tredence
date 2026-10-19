@@ -164,6 +164,30 @@ def test_regrow_picks_dead_weights_with_largest_dense_gradient_and_spares_droppe
     assert g2[grown].min() >= np.sort(g2[dead_before])[-int(grown.sum())] - 1e-12
 
 
+def test_regrow_never_revives_weights_pruned_in_the_same_event() -> None:
+    model, opt, _ = tiny()
+    pr = make_pruner(model, opt, final=0.5, regrow=0.2, floor_frac=0.0)
+    pr.event(10)
+    pr.event(30)  # some weights are now dead: valid regrowth candidates
+    flat_alive = np.concatenate([p.alive().ravel() for p in pr.params])
+    flat_w = np.abs(np.concatenate([p.data.ravel() for p in pr.params]))
+    n_drop = flat_alive.sum() - (pr.total - round(pr.total * pr.schedule.sparsity_at(50)))
+    weakest = np.argsort(np.where(flat_alive, flat_w, np.inf), kind="stable")[:n_drop]
+    dead = np.flatnonzero(~flat_alive)
+    flat_g2 = np.zeros(pr.total)
+    flat_g2[weakest] = 1e3  # largest dense gradient, but they are pruned in this very event
+    flat_g2[dead] = 1.0
+    off = 0
+    for acc in pr.dense_g2:
+        acc[...] = flat_g2[off : off + acc.size].reshape(acc.shape)
+        off += acc.size
+    pr.event(50)
+    alive = np.concatenate([p.alive().ravel() for p in pr.params])
+    assert pr.log[-1]["regrown"] > 0
+    assert alive[dead].any()  # regrowth did happen, from previously dead weights
+    assert not alive[weakest].any()
+
+
 def test_grace_period_protects_regrown_weights() -> None:
     model, opt, _ = tiny()
     pr = make_pruner(model, opt, final=0.5, regrow=0.0, grace_events=2, floor_frac=0.0)

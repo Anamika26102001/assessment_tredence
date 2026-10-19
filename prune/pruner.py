@@ -15,7 +15,7 @@ Safety rails (applied identically to every criterion):
   ranking cannot disconnect the network;
 * grace period: a just-regrown weight starts at exactly 0 and would score ~0 at the next
   event, so it is protected from being dropped for ``grace_events`` events;
-* weights dropped in an event cannot be regrown in the same event.
+* weights pruned or swapped out in an event cannot be regrown in the same event.
 
 Pruned and regrown entries go through ``Parameter.set_mask(..., optimizer)``: weight set
 to exact 0 and Adam m / v / t reset, so a revived connection trains like a fresh one.
@@ -116,8 +116,10 @@ class Pruner:
         target = self.schedule.sparsity_at(n_done)
         scores = self.criterion.scores(self.params)
         before = self.n_alive()
+        alive_before = self._flat([p.alive() for p in self.params])
         n_dropped = self._prune(target, scores, n_done)
-        n_grown = self._regrow(n_done, scores) if self.regrow_frac > 0 else 0
+        just_pruned = alive_before & ~self._flat([p.alive() for p in self.params])
+        n_grown = self._regrow(n_done, scores, just_pruned) if self.regrow_frac > 0 else 0
         achieved = self.sparsity()
         n_keep = self.total - round(self.total * target)
         if self.n_alive() > before or self.n_alive() != min(before, n_keep):
@@ -155,11 +157,14 @@ class Pruner:
         self._install(keep, n_done, grown=None)
         return n_alive - n_keep
 
-    def _regrow(self, n_done: int, scores: list[np.ndarray]) -> int:
+    def _regrow(
+        self, n_done: int, scores: list[np.ndarray], just_pruned: np.ndarray | None = None
+    ) -> int:
         frac = self.regrow_frac * 0.5 * (1 + math.cos(math.pi * self.schedule.progress(n_done)))
         k = round(frac * self.n_alive())
         alive = self._flat([p.alive() for p in self.params])
-        k = min(k, int((~alive).sum()))
+        candidates = ~alive if just_pruned is None else ~alive & ~just_pruned
+        k = min(k, int(candidates.sum()))
         if k <= 0:
             return 0
         forced = self._forced(scores, n_done, protect=True)
@@ -169,7 +174,7 @@ class Pruner:
             return 0
         drop_key = np.where(droppable, self._flat(scores), np.inf)
         drop = np.argsort(drop_key, kind="stable")[:k]
-        grow_key = np.where(alive, -np.inf, np.sqrt(self._flat(self.dense_g2)))
+        grow_key = np.where(candidates, np.sqrt(self._flat(self.dense_g2)), -np.inf)
         grow = np.argsort(-grow_key, kind="stable")[:k]
         keep = alive.copy()
         keep[drop] = False

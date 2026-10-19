@@ -6,7 +6,7 @@ export VECLIB_MAXIMUM_THREADS := 1
 
 RUN := uv run
 
-.PHONY: install lint typecheck test gradcheck train prune sweep sweep-quick bench demo check
+.PHONY: install lint typecheck test gradcheck train prune sweep sweep-quick bench bench-variance ablate demo check
 
 install:
 	uv sync
@@ -42,6 +42,18 @@ sweep:
 
 sweep-quick:
 	$(RUN) python -m scripts.sweep --quick --out results/quick_runs
+
+bench-variance:
+	$(RUN) python -m scripts.bench_variance
+
+ablate:
+	$(RUN) python -m scripts.ablate_oracle
+	$(RUN) python -m scripts.ablate_rankcorr
+	$(RUN) python -m scripts.ablate_overlap
+	$(RUN) python -m scripts.ablate_sgd
+	$(RUN) python -m scripts.ablate_beta
+	$(RUN) python -m scripts.ablate_dense_baseline
+	$(RUN) python -m scripts.stats
 
 demo:
 	$(RUN) python -m scripts.export_demo
